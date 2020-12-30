@@ -57,6 +57,50 @@ class WithHeadingsTest extends TestCase
     /**
      * @test
      */
+    public function can_export_from_collection_with_falsy_heading_row()
+    {
+        $export = new class implements FromCollection, WithHeadings
+        {
+            use Exportable;
+
+            /**
+             * @return Collection
+             */
+            public function collection()
+            {
+                return collect([
+                    ['A1', 'B1', 'C1'],
+                    ['A2', 'B2', 'C2'],
+                ]);
+            }
+
+            /**
+             * @return array
+             */
+            public function headings(): array
+            {
+                return ['', 'A', 'B'];
+            }
+        };
+
+        $response = $export->store('with-heading-store.xlsx');
+
+        $this->assertTrue($response);
+
+        $actual = $this->readAsArray(__DIR__ . '/../Data/Disks/Local/with-heading-store.xlsx', 'Xlsx');
+
+        $expected = [
+            ['', 'A', 'B'],
+            ['A1', 'B1', 'C1'],
+            ['A2', 'B2', 'C2'],
+        ];
+
+        $this->assertEquals($expected, $actual);
+    }
+
+    /**
+     * @test
+     */
     public function can_export_from_collection_with_multiple_heading_rows()
     {
         $export = new class implements FromCollection, WithHeadings {
